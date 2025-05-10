@@ -28,7 +28,7 @@ export const register = async (req, res, next) => {
 
 		const { contraseña: hashedPassword, ...user } = userSaved._doc;
 
-		const expires = new Date(Date.now() + 24 * 3600000);
+		const expires = new Date(Date.now() + 365 * 24 * 3600000);
 
 		res.cookie('token', token, {
 			expires,
@@ -63,7 +63,8 @@ export const login = async (req, res, next) => {
 		});
 		const { contraseña: hashedPassword, ...user } = userFound._doc;
 
-		const expires = new Date(Date.now() + 24 * 3600000);
+	
+		const expires = new Date(Date.now() + 365 * 24 * 3600000);
 
 		res.cookie('token', token, {
 			expires,
