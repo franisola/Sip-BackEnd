@@ -3,11 +3,11 @@ import { createPet, getPets, getPet, deletePet } from '../controllers/pet.contro
 import { authRequired } from '../middlewares/validateToken.js';
 import { validateSchema } from '../middlewares/validator.middleware.js';
 import { petSchema } from '../schemas/pet.schema.js';
-import { roleClient } from '../middlewares/validateRoleUser.middleware.js';
+
 
 const router = Router();
 
-router.post('/pets', authRequired, roleClient, validateSchema(petSchema), createPet);
+router.post('/pets', authRequired, validateSchema(petSchema), createPet);
 
 //router.post('/pets',  createPet);
 

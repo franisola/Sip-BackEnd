@@ -90,6 +90,27 @@ export const loginSchema = z.object({
 });
 
 export const editProfileSchema = z.object({
+	nombre: z
+		.string({
+			message: 'Debes completar este campo',
+		})
+		.min(3, {
+			message: 'El nombre debe tener al menos 3 caracteres',
+		})
+		.max(30, {
+			message: 'El nombre debe tener como máximo 30 caracteres',
+		}),
+
+	apellido: z
+		.string({
+			message: 'Debes completar este campo',
+		})
+		.min(3, {
+			message: 'El apellido debe tener al menos 3 caracteres',
+		})
+		.max(30, {
+			message: 'El apellido debe tener como máximo 30 caracteres',
+		}),
 	domicilio: z
 		.string({
 			message: 'El domicilio debe ser un string',
@@ -115,15 +136,9 @@ export const editProfileSchema = z.object({
 			message: 'El teléfono debe comenzar con 11 o 15',
 		})
 		.optional(),
-
-
-
 	foto: z.string().optional(),
 	email: z.undefined(), // No se puede enviar en la edición de perfil
-	nombre: z.undefined(), // No se puede enviar en la edición de perfil
-	apellido: z.undefined(), // No se puede enviar en la edición de perfil
 	contrasena: z.undefined(), // No se puede enviar en la edición de perfil
-
 });
 
 export const verifyUserSchema = z.object({

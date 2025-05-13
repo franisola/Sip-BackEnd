@@ -25,4 +25,6 @@ const PetSchema = new mongoose.Schema(
 	}
 );
 
+
+
 export default mongoose.model('Pet', PetSchema);
