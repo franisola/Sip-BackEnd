@@ -7,7 +7,7 @@ import { petSchema } from '../schemas/pet.schema.js';
 
 const router = Router();
 
-router.post('/pets', authRequired, validateSchema(petSchema), createPet);
+router.post('/pets', validateSchema(petSchema), createPet);
 
 //router.post('/pets',  createPet);
 

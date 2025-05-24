@@ -2,14 +2,14 @@ import Pet from '../models/pet.model.js';
 import { tipoMascota as list } from '../config.js';
 
 export const createPet = async (req, res, next) => {
-	const { nombre, tipoMascota } = req.body;
+	const { nombre, tipoMascota, userId } = req.body;
 
 	const newPet = new Pet({
 		nombre,
 		tipoMascota: list[tipoMascota],
-		user: req.user.id,
+		user: userId,
 	});
-	// : req.user.id,
+
 	try {
 		const petSaved = await newPet.save();
 		res.status(201).json(petSaved);
