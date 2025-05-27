@@ -15,7 +15,6 @@ export const createComment = async (req, res, next) => {
 			service: id_service,
 			comentario,
 			calificacion,
-			fecha: new Date(), // Date.now(),
 		});
 
 		const commentSaved = await newComment.save();
@@ -30,11 +29,16 @@ export const createComment = async (req, res, next) => {
 			},
 		]);
 
+		console.log(agg);
+		
+		
+
 		// Actualizar la calificación del servicio
 		if (agg.length > 0) {
 			await Service.updateOne(
 				{ _id: id_service },
-				{ calificacion: Math.round(agg[0].avgRating) }
+				// { calificacion: Math.round(agg[0].avgRating) },
+				{ calificacion: agg[0].avgRating }
 			);
 		}
 

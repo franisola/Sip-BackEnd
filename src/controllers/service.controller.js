@@ -37,6 +37,18 @@ export const getServices = async (req, res, next) => {
 	}
 };
 
+export const getRandomServices = async (req, res, next) => {
+	try {
+		const randomServices = await Service.aggregate([
+			{ $sample: { size: 8 } },
+		]);
+
+		res.status(200).json(randomServices);
+	} catch (error) {
+		next(error);
+	}
+};
+
 export const getServiceQuery = async (req, res, next) => {
 	const { categoria, tipoMascota, frecuencia, zona, calificacion } = req.query;
 
@@ -76,7 +88,12 @@ export const getService = async (req, res, next) => {
 
 	try {
 		const service = await Service.findById({ _id: id }).populate('user');
-		const comments = await Comment.find({ service: id }).populate('user');
+
+		if (!service)
+			return next({ message: 'Service not found', statusCode: 404 });
+
+
+		const comments = await Comment.find({ service: id }).populate('user');	
 		const totalComments = await Comment.countDocuments({ service: id });
 
 		const feedback = {
@@ -84,10 +101,15 @@ export const getService = async (req, res, next) => {
 			averageServiceRating: service.calificacion,
 		};
 
-		if (!service || service.isDeleted)
-			return next({ message: 'Service not found', statusCode: 404 });
+		const relatedServices = await Service.aggregate([
+			{ $match: {
+				user: service.user._id,
+				_id: { $ne: service._id },
+			}},
+			{ $sample: { size: 4 } }, // 4 servicios aleatorios
+		]);
 
-		res.status(200).json({ service, feedback, comments });
+		res.status(200).json({ service, feedback, comments, relatedServices });
 	} catch (error) {
 		next(error);
 	}

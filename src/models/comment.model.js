@@ -22,11 +22,7 @@ const commentSchema = new mongoose.Schema(
             min: 1,
             max: 5,
             default: 1,
-        },
-        fecha: {
-            type: Date,
-            default: Date.now,
-        },
+        }
     }, {
         timestamps: true,
     }

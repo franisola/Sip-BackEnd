@@ -1,30 +1,39 @@
-import mercadopago from 'mercadopago';
+import { MercadoPagoConfig, Preference, Payment as Paymentt } from 'mercadopago';
+
+import { PayerRequest } from "mercadopago/dist/clients/payment/create/types";
+
 import Contract from '../models/contract.model.js';
 import Service from '../models/service.model.js';
 import Payment from '../models/payment.model.js';
 
-// mercadopago.configurations.setAccessToken(process.env.MP_ACCESS_TOKEN);
+const mercadopago = new MercadoPagoConfig({
+	accessToken:
+		// process.env.MP_ACCESS_TOKEN ||
+		'TEST-630777054265325-052322-e677682969054d09d8ba49719279ec0a-249294638',
+});
+
+const preferenceClient = new Preference(mercadopago);
 
 export const createPreference = async (req, res) => {
-    console.log("hola");
-    
 	try {
 		const { fecha, horarioInicio, horarioFin, serviceId } = req.body;
-
 
 		const service = await Service.findById(serviceId);
 		if (!service) return res.status(404).json({ msg: 'Servicio no encontrado' });
 
-
 		const cliente = req.user.id;
-		const proveedor = service.user._id; 
+		const proveedor = service.user._id;
 
+		const price = Number(service.precio);
+		if (isNaN(price) || price <= 0) {
+			return res.status(400).json({ message: 'Precio inválido en el servicio' });
+		}
 
-		const preference = {
+		const preferenceData = {
 			items: [
 				{
-					title: `Servicio: ${service.name || servicio}`,
-					unit_price: service.precio,
+					title: `Servicio: ${service.titulo}`,
+					unit_price: price,
 					quantity: 1,
 				},
 			],
@@ -35,18 +44,26 @@ export const createPreference = async (req, res) => {
 			},
 			auto_return: 'approved',
 			metadata: {
-				service,
-				cliente,
-				proveedor,
-				fecha,
-				horarioInicio,
-				horarioFin,
+				service: service._id.toString(),
+				cliente: cliente.toString(),
+				proveedor: proveedor.toString(),
+				fecha: fecha || '',
+				horarioInicio: horarioInicio || '',
+				horarioFin: horarioFin || '',
 			},
+			excluded_payment_methods: [
+				{ id: 'account_money' }, // Saldo en cuenta
+				{ id: 'ticket' }, // Pago fácil, Rapipago
+				{ id: 'bank_transfer' }, // Transferencia
+				{ id: 'atm' }, // Cajero automático
+			],
 		};
 
-		const response = await mercadopago.preferences.create(preference);
+		const response = await preferenceClient.create(preferenceData);
 
-		return res.status(201).json({ preferenceId: response.body.id });
+		console.log('MP Preference created:', response);
+
+		return res.status(201).json({ preferenceId: response.response.id });
 	} catch (error) {
 		console.error('Error creating MP preference:', error);
 		return res.status(500).json({ message: 'Error creating payment preference' });
@@ -98,11 +115,11 @@ export const paymentWebhook = async (req, res) => {
 			const existingContract = await Contract.findOne({ pago: payment._id });
 
 			if (!existingContract) {
-				const { servicio, cliente, proveedor, fecha, horarioInicio, horarioFin } =
+				const { service, cliente, proveedor, fecha, horarioInicio, horarioFin } =
 					payment.metadata;
 
 				const newContract = new Contract({
-					servicio,
+					service,
 					cliente,
 					proveedor,
 					fecha,

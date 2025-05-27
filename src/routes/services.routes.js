@@ -6,6 +6,7 @@ import {
 	updateService,
 	deleteService,
 	getServiceQuery,
+	getRandomServices
 	// getAssociatedServices
 
 } from '../controllers/service.controller.js';
@@ -17,6 +18,8 @@ const router = Router();
 
 router.post('/services', authRequired, validateSchema(createServiceSchema), createService);
 //router.post('/services', createService);
+
+router.get('/random-services', authRequired, getRandomServices);
 
 router.get('/:idUser/services', authRequired, getServices);
 

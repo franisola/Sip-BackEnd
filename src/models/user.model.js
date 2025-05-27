@@ -50,7 +50,7 @@ const UserSchema = new mongoose.Schema(
 			type: String,
 			trim: true,
 			default:
-				'https://firebasestorage.googleapis.com/v0/b/tpoapi-fe3ee.appspot.com/o/image_header.png?alt=media&token=56073619-3c33-4e90-b0c1-57e1e0344439',
+				'https://firebasestorage.googleapis.com/v0/b/seminario-pet.firebasestorage.app/o/defaultImg%2FImage-not-found.png?alt=media&token=24ab2228-6d4d-425c-a59e-fdc6c3c2ef5c',
 		},
 	},
 	{
