@@ -9,13 +9,10 @@ const router = Router();
 
 router.post('/pets', validateSchema(petSchema), createPet);
 
-//router.post('/pets',  createPet);
-
 router.get('/pets', authRequired, getPets);
 
 router.get('/pets/:id', authRequired, getPet);
 
-// router.delete('/pets/:id', authRequired, roleClient, deletePet);
 router.delete('/pets/:id', deletePet);
 
 export default router;

@@ -1,61 +1,67 @@
 import mongoose from 'mongoose';
-import { categoria, frecuencia, tipoMascota, estado } from '../config.js';
 
 const serviceSchema = new mongoose.Schema({
-	nombre: {
-		type: String,
-		required: [true, 'Please provide a name'],
-		trim: true,
-	},
-	categoria: {
-		type: String,
-		required: [true, 'Please provide a category'],
-		trim: true,
-		enum: categoria,
-	},
-	frecuencia: {
-		type: String,
-		required: [true, 'Please provide a frequency'],
-		trim: true,
-		enum: frecuencia,
-	},
-	tipoMascota: {
-		type: String,
-		required: [true, 'Please provide a pet type'],
-		trim: true,
-		enum: tipoMascota,
-	},
-	costoHR: {
-		type: Number,
-		required: [true, 'Please provide a cost per hour'],
-	},
-	estado: {
-		type: String,
-		default: 'Publicado',
-		enum: estado,
-	},
-    zona: {
+    titulo: {
         type: String,
-        required: false,
+        required: [true, 'Por favor proporciona un título'],
+        trim: true,
     },
-	descripcion: {
-		type: String,
-		required: [true, 'Please provide a description'],
-		trim: true,
-	},
-	calificacion:{
+    animales: {
+        type: [String], // Ejemplo: ['0', '1']
+        required: [true, 'Por favor proporciona los tipos de animales'],
+    },
+    dias: {
+        type: [String], // Ejemplo: ["miercoles", "jueves"]
+        required: [true, 'Por favor proporciona los días'],
+    },
+    descripcion: {
+        type: String,
+        required: [true, 'Por favor proporciona una descripción'],
+        trim: true,
+    },
+    precio: {
+        type: Number,
+        required: [true, 'Por favor proporciona un precio'],
+    },
+    horaInicio: {
+        type: String,
+        required: [true, 'Por favor proporciona la hora de inicio'],
+        trim: true,
+    },
+    horaFin: {
+        type: String,
+        required: [true, 'Por favor proporciona la hora de fin'],
+        trim: true,
+    },
+	calificacion: {
 		type: Number,
 		default: 1,
 	},
-    isDeleted: {
-        type: Boolean,
-        default: false,
+    domicilio: {
+        type: String,
+        required: [true, 'Por favor proporciona el domicilio'],
+        trim: true,
     },
-	user: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'User',
-		required: true,
-	},
+    telefono: {
+        type: String,
+        required: [true, 'Por favor proporciona el teléfono'],
+        trim: true,
+    },
+    imagen: {
+        type: String,
+        required: false,
+        trim: true,
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+
+}, 
+{
+	timestamps: true,
+	versionKey: false,
 });
 
 export default mongoose.model('Service', serviceSchema);

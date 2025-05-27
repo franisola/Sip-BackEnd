@@ -1,41 +1,63 @@
 import Contract from '../models/contract.model.js';
 import Service from '../models/service.model.js';
+import Payment from '../models/payment.model.js';
 
-export const createContract = async (req, res, next) => {
-	const { fechaInicio, fechaFin, horarioReferencia, motivoDelServicio } = req.body;
-	const { id_service } = req.params;
+// function timesOverlap(startTime1, endTime1, startTime2, endTime2) {
+// 	// Convert to minutes since midnight for comparison
+// 	const [h1s, m1s] = startTime1.split(':').map(Number);
+// 	const [h1e, m1e] = endTime1.split(':').map(Number);
+// 	const [h2s, m2s] = startTime2.split(':').map(Number);
+// 	const [h2e, m2e] = endTime2.split(':').map(Number);
+
+// 	const start1 = h1s * 60 + m1s;
+// 	const end1 = h1e * 60 + m1e;
+// 	const start2 = h2s * 60 + m2s;
+// 	const end2 = h2e * 60 + m2e;
+
+// 	if (end1 <= start2 || end2 <= start1) {
+// 		return false;
+// 	}
+// 	return true;
+// }
+
+// export const createContract = async (req, res, next) => {
+// 	const { fecha, horarioInicio, horarioFin } = req.body;
+// 	const { id_service } = req.params;
+
+// 	const service = await Service.findById(id_service);
+// 	if (!service) return res.status(404).json({ msg: 'Servicio no encontrado' });
 
 
 
-	const idUser = req.user.id;
+// 	const idUserCliente = req.user.id;
+// 	const idProveedor = await Service.findById(id_service);
 
-	const idPetSitter = await Service.findById(id_service);
+// 	const newContract = new Contract({
+// 		fecha,
+// 		horarioInicio,
+// 		horarioFin,
+// 		service: id_service,
+// 		idProveedor: idProveedor.user._id,
+// 		cliente: idUserCliente,
+// 	});
 
-	const newContract = new Contract({
-		fechaInicio,
-		fechaFin,
-		horarioReferencia,
-		motivoDelServicio,
-		idPetSitter: idPetSitter.user._id,
-		service: id_service,
-		user: idUser,
-	});
-
-	try {
-		const contractSaved = await newContract.save();
-		res.status(201).json(contractSaved);
-	} catch (error) {
-  		next(error);
-	}
-};
+// 	try {
+// 		const contractSaved = await newContract.save();
+// 		res.status(201).json(contractSaved);
+// 	} catch (error) {
+// 		next(error);
+// 	}
+// };
 
 export const getContracts = async (req, res, next) => {
 	const { id } = req.user;
 	try {
-		const contracts = await Contract.find({ idPetSitter: id }).populate('service').populate('user');
-        const lastContracts = contracts.slice(-2);
+		const contracts = await Contract.find({ idPetSitter: id })
+			.populate('service')
+			.populate('user');
+		const lastContracts = contracts.slice(-2);
 
-		res.status(200).json({contracts , lastContracts});
+		res.status(200).json({ contracts, lastContracts });
 	} catch (error) {
 		next(error);
 	}
