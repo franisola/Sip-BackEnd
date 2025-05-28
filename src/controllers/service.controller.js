@@ -100,27 +100,38 @@ export const getService = async (req, res, next) => {
 	try {
 		const service = await Service.findById({ _id: id }).populate('user');
 
-		if (!service)
-			return next({ message: 'Service not found', statusCode: 404 });
+if (!service)
+  return next({ message: 'Service not found', statusCode: 404 });
 
+const comments = await Comment.find({ service: id }).populate('user');
+const totalComments = await Comment.countDocuments({ service: id });
 
-		const comments = await Comment.find({ service: id }).populate('user');	
-		const totalComments = await Comment.countDocuments({ service: id });
+const feedback = {
+  totalComments,
+  averageServiceRating: service.calificacion,
+};
 
-		const feedback = {
-			totalComments,
-			averageServiceRating: service.calificacion,
-		};
+const relatedServices = await Service.aggregate([
+  {
+    $match: {
+      user: service.user._id,
+      _id: { $ne: service._id },
+    }
+  },
+  { $sample: { size: 4 } },
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'user',
+      foreignField: '_id',
+      as: 'user',
+    }
+  },
+  { $unwind: '$user' }
+]);
 
-		const relatedServices = await Service.aggregate([
-			{ $match: {
-				user: service.user._id,
-				_id: { $ne: service._id },
-			}},
-			{ $sample: { size: 4 } }, // 4 servicios aleatorios
-		]);
+res.status(200).json({ service, feedback, comments, relatedServices });
 
-		res.status(200).json({ service, feedback, comments, relatedServices });
 	} catch (error) {
 		next(error);
 	}
