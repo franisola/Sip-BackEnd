@@ -1,6 +1,6 @@
 import { MercadoPagoConfig, Preference, Payment as Paymentt } from 'mercadopago';
 
-import { PayerRequest } from "mercadopago/dist/clients/payment/create/types";
+// import { PayerRequest } from "mercadopago/dist/clients/payment/create/types";
 
 import Contract from '../models/contract.model.js';
 import Service from '../models/service.model.js';

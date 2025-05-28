@@ -16,21 +16,21 @@ import { validateSchema } from '../middlewares/validator.middleware.js';
 import { createServiceSchema, updateServiceSchema } from '../schemas/service.schema.js';
 const router = Router();
 
-router.post('/services', authRequired, validateSchema(createServiceSchema), createService);
+router.post('/services', validateSchema(createServiceSchema), createService);
 //router.post('/services', createService);
 
-router.get('/random-services', authRequired, getRandomServices);
+router.get('/random-services', getRandomServices);
 
-router.get('/:idUser/services', authRequired, getServices);
+router.get('/:idUser/services', getServices);
 
-router.get('/services/:id', authRequired, getService);
+router.get('/services/:id', getService);
 
-router.put('/services/:id', authRequired, validateSchema(updateServiceSchema), updateService);
+router.put('/services/:id', validateSchema(updateServiceSchema), updateService);
 
-router.delete('/services/:id', authRequired, deleteService);
+router.delete('/services/:id', deleteService);
 
 
-router.get('/services', authRequired, getServiceQuery);
+router.get('/services', getServiceQuery);
 
 
 // router.get('/associated-services', authRequired, getAssociatedServices);

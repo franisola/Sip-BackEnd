@@ -4,9 +4,9 @@ import User from '../models/user.model.js';
 
 
 export const createService = async (req, res, next) => {
-	const { titulo, animales, dias, descripcion, precio, horaInicio, horaFin } = req.body;
+	const { titulo, animales, dias, descripcion, precio, horaInicio, horaFin, userId } = req.body;
 
-	const user = await User.findById(req.user.id);
+	const user = await User.findById(userId);
 
 	const newService = new Service({
 		titulo,
@@ -16,13 +16,13 @@ export const createService = async (req, res, next) => {
 		precio,
 		horaInicio,
 		horaFin,
-		user: req.user.id,
+		user: userId,
 		telefono: user.telefono,
 		foto: user.foto,
 		domicilio: user.domicilio,
 	});
 
-	// user: req.user.id,
+	// user: userId,
 	const serviceSaved = await newService.save();
 	res.status(201).json(serviceSaved);
 };
@@ -30,7 +30,7 @@ export const createService = async (req, res, next) => {
 export const getServices = async (req, res, next) => {
 	const { idUser } = req.params;
 	try {
-		const services = await Service.find({ user: idUser, isDeleted: false }).populate('user');
+		const services = await Service.find({ user: idUser }).populate('user');
 		res.status(200).json(services);
 	} catch (error) {
 		next(error);
@@ -41,7 +41,18 @@ export const getRandomServices = async (req, res, next) => {
 	try {
 		const randomServices = await Service.aggregate([
 			{ $sample: { size: 8 } },
-		]);
+			{
+			  $lookup: {
+				from: 'users', // nombre de la colección en MongoDB
+				localField: 'user', // el campo en el documento `Service`
+				foreignField: '_id', // el campo en el documento `User`
+				as: 'user', // nombre del campo en el resultado
+			  },
+			},
+			{
+			  $unwind: '$user', // opcional: convierte el array 'user' en un objeto
+			},
+		  ]);
 
 		res.status(200).json(randomServices);
 	} catch (error) {
