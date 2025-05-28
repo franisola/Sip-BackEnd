@@ -5,9 +5,14 @@ import mongoose from 'mongoose';
 export const createComment = async (req, res, next) => {
 	const { comentario, calificacion, id } = req.body;
 	const { id_service } = req.params;
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> bc644b23f4040fc1aa465666822c9a992bef7631
 
 	const id_service_ObjectId = new mongoose.Types.ObjectId(id_service);
+
 
 	try {
 		const newComment = await Comment.create({
@@ -27,10 +32,7 @@ export const createComment = async (req, res, next) => {
 					avgRating: { $avg: '$calificacion' },
 				},
 			},
-		]);
-
-		console.log(agg);
-		
+		]);		
 		
 
 		// Actualizar la calificación del servicio
