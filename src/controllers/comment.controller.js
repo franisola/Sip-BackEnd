@@ -3,9 +3,9 @@ import Service from '../models/service.model.js';
 import mongoose from 'mongoose';
 
 export const createComment = async (req, res, next) => {
-	const { comentario, calificacion } = req.body;
+	const { comentario, calificacion, id } = req.body;
 	const { id_service } = req.params;
-	const { id } = req.user;
+
 
 	const id_service_ObjectId = new mongoose.Types.ObjectId(id_service);
 
@@ -63,7 +63,7 @@ export const getComments = async (req, res, next) => {
 export const getComment = async (req, res, next) => {
 	const { id } = req.params;
 	try {
-		const comment = await Comment.findById(id); //.populate('user').populate('service');
+		const comment = await Comment.findById(id)//.populate('user').populate('service');
 		if (!comment) return next({ message: 'Comment not found', statusCode: 404 });
 
 		res.status(200).json(comment);

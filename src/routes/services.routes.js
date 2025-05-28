@@ -17,23 +17,23 @@ import { createServiceSchema, updateServiceSchema } from '../schemas/service.sch
 const router = Router();
 
 router.post('/services', validateSchema(createServiceSchema), createService);
-//router.post('/services', createService);
+router.get('/services/search', getServiceQuery);
 
-router.get('/random-services', getRandomServices);
+router.get('/services/random', getRandomServices);
 
-router.get('/:idUser/services', getServices);
+router.get('/users/:idUser/services', getServices);
+
 
 router.get('/services/:id', getService);
-
 router.put('/services/:id', validateSchema(updateServiceSchema), updateService);
-
 router.delete('/services/:id', deleteService);
 
 
-router.get('/services', getServiceQuery);
 
 
-// router.get('/associated-services', authRequired, getAssociatedServices);
+
+
+
 
 
 

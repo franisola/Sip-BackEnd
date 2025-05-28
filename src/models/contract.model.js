@@ -21,12 +21,13 @@ const contractSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    horarioInicio: {
-      type: String,
+    animal: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Animal',
       required: true,
     },
-    horarioFin: {
-      type: String,
+    precio: {
+      type: Number,
       required: true,
     },
     pago: {

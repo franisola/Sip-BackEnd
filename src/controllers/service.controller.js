@@ -2,7 +2,6 @@ import Service from '../models/service.model.js';
 import Comment from '../models/comment.model.js';
 import User from '../models/user.model.js';
 
-
 export const createService = async (req, res, next) => {
 	const { titulo, animales, dias, descripcion, precio, horaInicio, horaFin, userId } = req.body;
 
@@ -42,17 +41,17 @@ export const getRandomServices = async (req, res, next) => {
 		const randomServices = await Service.aggregate([
 			{ $sample: { size: 8 } },
 			{
-			  $lookup: {
-				from: 'users', // nombre de la colección en MongoDB
-				localField: 'user', // el campo en el documento `Service`
-				foreignField: '_id', // el campo en el documento `User`
-				as: 'user', // nombre del campo en el resultado
-			  },
+				$lookup: {
+					from: 'users', // nombre de la colección en MongoDB
+					localField: 'user', // el campo en el documento `Service`
+					foreignField: '_id', // el campo en el documento `User`
+					as: 'user', // nombre del campo en el resultado
+				},
 			},
 			{
-			  $unwind: '$user', // opcional: convierte el array 'user' en un objeto
+				$unwind: '$user', // opcional: convierte el array 'user' en un objeto
 			},
-		  ]);
+		]);
 
 		res.status(200).json(randomServices);
 	} catch (error) {
@@ -61,36 +60,51 @@ export const getRandomServices = async (req, res, next) => {
 };
 
 export const getServiceQuery = async (req, res, next) => {
-	const { categoria, tipoMascota, frecuencia, zona, calificacion } = req.query;
-
-	let queryObj = {
-		isDeleted: false,
-		estado: 'Publicado',
-	};
-
-	if (categoria !== 'undefined') queryObj.categoria = C[categoria];
-	if (tipoMascota !== 'undefined') queryObj.tipoMascota = TP[tipoMascota];
-	if (frecuencia !== 'undefined') queryObj.frecuencia = F[frecuencia];
-	if (zona !== 'undefined') queryObj.zona = CABA[zona];
-	if (calificacion !== 'undefined') queryObj.calificacion = calificacion;
-
-	const page = parseInt(req.query.page) || 1;
-	const limit = 10;
-	const skip = (page - 1) * limit;
-
 	try {
-		const services = await Service.find(queryObj).skip(skip).limit(limit).populate('user');
+		const { q } = req.query;
+		if (!q) {
+			return res.status(400).json({ success: false, message: 'Query is required' });
+		}
 
-		if (!services) return next({ message: 'No services found', statusCode: 404 });
+		const tokens = q
+			.normalize('NFD')
+			.replace(/[\u0300-\u036f]/g, '')
+			.replace(/['"]+/g, '')
+			.split(' ')
+			.filter(Boolean);
 
-		const hasMore = await Service.exists({
-			...queryObj,
-			_id: { $gt: services[services.length - 1]._id },
-		});
+		const regexes = tokens.map((token) => new RegExp(token, 'i'));
 
-		res.status(200).json({ data: services, hasMore });
+		const services = await Service.aggregate([
+			{
+				$lookup: {
+					from: 'users',
+					localField: 'user',
+					foreignField: '_id',
+					as: 'user',
+				},
+			},
+			{ $unwind: '$user' },
+			{
+				$match: {
+					$or: regexes.map((regex) => ({
+						$or: [
+							{ titulo: { $regex: regex } },
+							{ animales: { $elemMatch: { $regex: regex } } },
+							{ dias: { $elemMatch: { $regex: regex } } },
+							{ 'user.nombre': { $regex: regex } },
+							{ 'user.apellido': { $regex: regex } },
+						],
+					})),
+				},
+			},
+		]);
+
+
+		res.status(200).json({ success: true, services });
 	} catch (error) {
-		next(error);
+		console.error(error);
+		res.status(500).json({ success: false, message: 'Error interno del servidor', error });
 	}
 };
 
@@ -100,38 +114,36 @@ export const getService = async (req, res, next) => {
 	try {
 		const service = await Service.findById({ _id: id }).populate('user');
 
-if (!service)
-  return next({ message: 'Service not found', statusCode: 404 });
+		if (!service) return next({ message: 'Service not found', statusCode: 404 });
 
-const comments = await Comment.find({ service: id }).populate('user');
-const totalComments = await Comment.countDocuments({ service: id });
+		const comments = await Comment.find({ service: id }).populate('user');
+		const totalComments = await Comment.countDocuments({ service: id });
 
-const feedback = {
-  totalComments,
-  averageServiceRating: service.calificacion,
-};
+		const feedback = {
+			totalComments,
+			averageServiceRating: service.calificacion,
+		};
 
-const relatedServices = await Service.aggregate([
-  {
-    $match: {
-      user: service.user._id,
-      _id: { $ne: service._id },
-    }
-  },
-  { $sample: { size: 4 } },
-  {
-    $lookup: {
-      from: 'users',
-      localField: 'user',
-      foreignField: '_id',
-      as: 'user',
-    }
-  },
-  { $unwind: '$user' }
-]);
+		const relatedServices = await Service.aggregate([
+			{
+				$match: {
+					user: service.user._id,
+					_id: { $ne: service._id },
+				},
+			},
+			{ $sample: { size: 4 } },
+			{
+				$lookup: {
+					from: 'users',
+					localField: 'user',
+					foreignField: '_id',
+					as: 'user',
+				},
+			},
+			{ $unwind: '$user' },
+		]);
 
-res.status(200).json({ service, feedback, comments, relatedServices });
-
+		res.status(200).json({ service, feedback, comments, relatedServices });
 	} catch (error) {
 		next(error);
 	}
@@ -165,15 +177,19 @@ export const updateService = async (req, res, next) => {
 };
 
 export const deleteService = async (req, res, next) => {
-    const { id } = req.params;
+	const { id } = req.params;
 
-    try {
-        const deletedService = await Service.findByIdAndDelete(id);
+	try {
+		const deletedService = await Service.findByIdAndDelete(id);
 
-        if (!deletedService) return next({ message: 'Service not found', statusCode: 404 });
+		if (!deletedService) return next({ message: 'Service not found', statusCode: 404 });
 
-        res.status(200).json({ success: true, message: 'Service deleted', service: deletedService });
-    } catch (error) {
-        next(error);
-    }
+		res.status(200).json({
+			success: true,
+			message: 'Service deleted',
+			service: deletedService,
+		});
+	} catch (error) {
+		next(error);
+	}
 };
