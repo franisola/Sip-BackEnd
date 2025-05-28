@@ -3,11 +3,12 @@ import Service from '../models/service.model.js';
 import mongoose from 'mongoose';
 
 export const createComment = async (req, res, next) => {
-	const { comentario, calificacion } = req.body;
+	const { comentario, calificacion, id } = req.body;
 	const { id_service } = req.params;
-	const { id } = req.user;
+	
 
 	const id_service_ObjectId = new mongoose.Types.ObjectId(id_service);
+
 
 	try {
 		const newComment = await Comment.create({
@@ -27,10 +28,7 @@ export const createComment = async (req, res, next) => {
 					avgRating: { $avg: '$calificacion' },
 				},
 			},
-		]);
-
-		console.log(agg);
-		
+		]);		
 		
 
 		// Actualizar la calificación del servicio

@@ -8,7 +8,7 @@ import { commentSchema } from '../schemas/comment.schema.js';
 
 const router = express.Router();
 
-router.post('/services/:id_service/comments', authRequired, validateSchema(commentSchema), createComment);
+router.post('/services/:id_service/comments', validateSchema(commentSchema), createComment);
 router.get('/services/:id_service/comments', authRequired, getComments);
 router.get('/comments/:id', authRequired, getComment);
 router.delete('/comments/:id', authRequired, deleteComment);
