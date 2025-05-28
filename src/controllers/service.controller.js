@@ -60,52 +60,67 @@ export const getRandomServices = async (req, res, next) => {
 };
 
 export const getServiceQuery = async (req, res, next) => {
-	try {
-		const { q } = req.query;
-		if (!q) {
-			return res.status(400).json({ success: false, message: 'Query is required' });
-		}
+	const { q } = req.query;
 
-		const tokens = q
-			.normalize('NFD')
-			.replace(/[\u0300-\u036f]/g, '')
-			.replace(/['"]+/g, '')
-			.split(' ')
-			.filter(Boolean);
-
-		const regexes = tokens.map((token) => new RegExp(token, 'i'));
-
-		const services = await Service.aggregate([
-			{
-				$lookup: {
-					from: 'users',
-					localField: 'user',
-					foreignField: '_id',
-					as: 'user',
-				},
-			},
-			{ $unwind: '$user' },
-			{
-				$match: {
-					$or: regexes.map((regex) => ({
-						$or: [
-							{ titulo: { $regex: regex } },
-							{ animales: { $elemMatch: { $regex: regex } } },
-							{ dias: { $elemMatch: { $regex: regex } } },
-							{ 'user.nombre': { $regex: regex } },
-							{ 'user.apellido': { $regex: regex } },
-						],
-					})),
-				},
-			},
-		]);
-
-
-		res.status(200).json({ success: true, services });
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ success: false, message: 'Error interno del servidor', error });
+	if (!q?.trim()) {
+	  return res.status(400).json({
+		success: false,
+		message: "Se requiere una consulta de búsqueda válida.",
+	  });
 	}
+	
+	try {
+	  const tokens = q
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "") // Elimina tildes
+		.replace(/[^\w\s]/gi, "") // Elimina símbolos raros y comillas
+		.toLowerCase()
+		.split(/\s+/)
+		.filter(Boolean);
+	
+	  if (tokens.length === 0) {
+		return res.status(400).json({
+		  success: false,
+		  message: "La consulta no contiene palabras clave útiles.",
+		});
+	  }
+	
+	  const regexes = tokens.map((token) => new RegExp(token, "i"));
+	
+	  const services = await Service.aggregate([
+		{
+		  $lookup: {
+			from: "users",
+			localField: "user",
+			foreignField: "_id",
+			as: "user",
+		  },
+		},
+		{ $unwind: "$user" },
+		{
+		  $match: {
+			$or: [
+			  { titulo: { $in: regexes } },
+			  { animales: { $in: regexes } },
+			  { dias: { $in: regexes } },
+			  { "user.nombre": { $in: regexes } },
+			  { "user.apellido": { $in: regexes } },
+			],
+		  },
+		},
+		{ $sort: { titulo: 1 } },
+	  ]);
+	
+	  return res.status(200).json({ success: true, services });
+	} catch (error) {
+	  console.error("❌ Error en búsqueda:", error);
+	  return res.status(500).json({
+		success: false,
+		message: "Error interno del servidor.",
+		error: error.message,
+	  });
+	}
+	
 };
 
 export const getService = async (req, res, next) => {
