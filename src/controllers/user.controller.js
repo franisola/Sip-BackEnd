@@ -91,7 +91,7 @@ export const profile = async (req, res, next) => {
 	try {
 		const userFound = await User.findById(id);
 
-		if (!userFound) next({ message: 'Usuario no encontrado', statusCode: 400 });
+		if (!userFound) return next({ message: 'Usuario no encontrado', statusCode: 400 });
 
 		let user = { user: userFound };
 		if (userFound.role === 1) {
@@ -145,7 +145,11 @@ export const changePassword = async (req, res, next) => {
 
 	try {
 		const passwordHashed = await bcrypt.hash(contrasena, 10);
+
 		const UserFound = await User.findOne({ email });
+		if (!UserFound)
+			return next({ message: 'Usuario no encontrado', key: 'email', statusCode: 400 });
+
 		const { _id: id } = UserFound;
 
 		const user = await User.findByIdAndUpdate(
@@ -155,8 +159,6 @@ export const changePassword = async (req, res, next) => {
 				new: true,
 			}
 		);
-
-		if (!user) return next({ message: 'Usuario no encontrado', key: 'email', statusCode: 400 });
 
 		res.status(200).json(user);
 	} catch (error) {

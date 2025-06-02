@@ -12,7 +12,6 @@ router.post('/services/:id_service/comments', validateSchema(commentSchema), cre
 router.get('/services/:id_service/comments', authRequired, getComments);
 router.get('/comments/:id', authRequired, getComment);
 router.delete('/comments/:id', authRequired, deleteComment);
-
 router.get('/pet-sitter-comments', authRequired, getLastComments);
 
 

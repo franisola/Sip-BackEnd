@@ -1,3 +1,24 @@
+/**
+ * User routes for authentication, profile management, and feedback.
+ *
+ * @module routes/users
+ * @requires express.Router
+ * @requires ../controllers/user.controller
+ * @requires ../middlewares/validateToken
+ * @requires ../middlewares/validate
+ * @requires ../middlewares/validator.middleware
+ * @requires ../schemas/user.schema
+ *
+ * Routes:
+ * - POST /register: Register a new user. Requires no authentication.
+ * - POST /login: Log in a user. Requires no authentication.
+ * - POST /logout: Log out the authenticated user.
+ * - GET /profile/:id: Get the profile of a user by ID. Requires authentication.
+ * - PUT /profile: Edit the authenticated user's profile.
+ * - POST /verify-data: Verify user data (e.g., for registration or password reset).
+ * - POST /change-password: Change or reset a user's password.
+ * - GET /:id/feedback: Get feedback for a user by ID. Requires authentication.
+ */
 import { Router } from 'express';
 import {
 	register,
