@@ -4,7 +4,10 @@ import { authRequired } from '../middlewares/validateToken.js';
 
 const router = express.Router();
 
-router.post('/create-preference', authRequired, createPreference);
-router.post('/webhook', authRequired, paymentWebhook);
+router.post('/create-preference', createPreference);
+router.post('/webhook', paymentWebhook);
 
 export default router;
+
+
+

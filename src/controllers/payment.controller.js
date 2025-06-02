@@ -1,75 +1,47 @@
-import { MercadoPagoConfig, Preference, Payment as Paymentt } from 'mercadopago';
+import { MercadoPagoConfig, Preference } from 'mercadopago';
 
-// import { PayerRequest } from "mercadopago/dist/clients/payment/create/types";
-
-import Contract from '../models/contract.model.js';
-import Service from '../models/service.model.js';
-import Payment from '../models/payment.model.js';
-
-const mercadopago = new MercadoPagoConfig({
-	accessToken:
-		// process.env.MP_ACCESS_TOKEN ||
-		'TEST-630777054265325-052322-e677682969054d09d8ba49719279ec0a-249294638',
+const client = new MercadoPagoConfig({
+  accessToken: 'TEST-7297851103691134-053118-764dba12729bc385a4bcb7ba9739eaca-358729445',
 });
 
-const preferenceClient = new Preference(mercadopago);
-
 export const createPreference = async (req, res) => {
-	try {
-		const { fecha, horarioInicio, horarioFin, serviceId } = req.body;
+  const { fecha, horarioInicio, horarioFin, serviceId } = req.body;
 
-		const service = await Service.findById(serviceId);
-		if (!service) return res.status(404).json({ msg: 'Servicio no encontrado' });
+  try {
+    const preference = new Preference(client);
 
-		const cliente = req.user.id;
-		const proveedor = service.user._id;
+    const result = await preference.create({
+      body: {
+        items: [
+          {
+            title: `Servicio hola`,
+            description: `Reserva para el ${fecha} de ${horarioInicio} a ${horarioFin}`,
+            quantity: 1,
+            unit_price: 1,
+            currency_id: 'ARS',
+          },
+        ],
+        back_urls: {
+          success: 'https://www.google.com/',
+		  failure: 'https://www.google.com/',
+		  pending: 'https://www.google.com/',
+        },
+        auto_return: 'approved',
+      },
+    });
 
-		const price = Number(service.precio);
-		if (isNaN(price) || price <= 0) {
-			return res.status(400).json({ message: 'Precio inválido en el servicio' });
-		}
+    const preferenceId = result.id;
 
-		const preferenceData = {
-			items: [
-				{
-					title: `Servicio: ${service.titulo}`,
-					unit_price: price,
-					quantity: 1,
-				},
-			],
-			back_urls: {
-				success: `${process.env.FRONTEND_URL}/payment/success`,
-				failure: `${process.env.FRONTEND_URL}/payment/failure`,
-				pending: `${process.env.FRONTEND_URL}/payment/pending`,
-			},
-			auto_return: 'approved',
-			metadata: {
-				service: service._id.toString(),
-				cliente: cliente.toString(),
-				proveedor: proveedor.toString(),
-				fecha: fecha || '',
-				horarioInicio: horarioInicio || '',
-				horarioFin: horarioFin || '',
-			},
-			excluded_payment_methods: [
-				{ id: 'account_money' }, // Saldo en cuenta
-				{ id: 'ticket' }, // Pago fácil, Rapipago
-				{ id: 'bank_transfer' }, // Transferencia
-				{ id: 'atm' }, // Cajero automático
-			],
-		};
-
-		const response = await preferenceClient.create(preferenceData);
-
-		console.log('MP Preference created:', response);
-
-		return res.status(201).json({ preferenceId: response.response.id });
-	} catch (error) {
-		console.error('Error creating MP preference:', error);
-		return res.status(500).json({ message: 'Error creating payment preference' });
-	}
+	console.log(`Preferencia creada con ID: ${preferenceId}`);
+	
+	
+	
+    res.status(200).json({ preferenceId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al crear la preferencia de pago' });
+  }
 };
-
 /**
  * Webhook para recibir notificaciones de Mercado Pago y crear contrato
  */
