@@ -1,112 +1,152 @@
-import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { MercadoPagoConfig, Preference, Payment as MP_Payment } from 'mercadopago';
+import Payment from '../models/payment.model.js';
+import Contract from '../models/contract.model.js';
+import Service from '../models/service.model.js';
 
+import mongoose from 'mongoose'; 
+
+// Configuración del cliente MercadoPago (v2+)
 const client = new MercadoPagoConfig({
-  accessToken: 'TEST-7297851103691134-053118-764dba12729bc385a4bcb7ba9739eaca-358729445',
+	// accessToken: 'APP_USR-7297851103691134-053118-b131a9d74a68f896fd24f36b27c16cb1-358729445',
+	// accessToken: "TEST-7297851103691134-053118-764dba12729bc385a4bcb7ba9739eaca-358729445",
+	accessToken: 'APP_USR-6155944193323036-060318-092fe0438774d9d4383daf24353331ca-2473947693',
 });
 
 export const createPreference = async (req, res) => {
-  const { fecha, horarioInicio, horarioFin, serviceId } = req.body;
+	const { fecha, precio, animal, serviceId, userId } = req.body;
 
-  try {
-    const preference = new Preference(client);
+	try {
+		const preference = new Preference(client);
 
-    const result = await preference.create({
-      body: {
-        items: [
-          {
-            title: `Servicio hola`,
-            description: `Reserva para el ${fecha} de ${horarioInicio} a ${horarioFin}`,
-            quantity: 1,
-            unit_price: 1,
-            currency_id: 'ARS',
-          },
-        ],
-        back_urls: {
-          success: 'https://www.google.com/',
-		  failure: 'https://www.google.com/',
-		  pending: 'https://www.google.com/',
-        },
-        auto_return: 'approved',
-      },
-    });
+		const result = await preference.create({
+			body: {
+				items: [
+					{
+						title: `Reserva de servicio`,
+						description: `Reserva para el ${fecha} con ${animal}`,
+						quantity: 1,
+						unit_price: precio, // Cambiar por el precio real cuando tengas
+						currency_id: 'ARS',
+					},
+				],
+				// redirect_urls: {
+				// 	success: 'http://localhost:5173/',
+				// 	failure: 'https://www.facebook.com/',
+				// 	pending: 'https://www.instagram.com/',
+				// },
+				back_urls: {
+					success: 'https://www.google.com/',
+					failure: 'https://www.google.com/',
+					pending: 'https://www.google.com/',
+				},
 
-    const preferenceId = result.id;
+				notification_url:
+					'https://2c31-2802-8010-3102-e701-d02-8bdf-e60f-15e9.ngrok-free.app/webhook',
+				auto_return: 'approved',
+				metadata: {
+					service: serviceId,
+					cliente: userId,
+					fecha,
+					animal,
+					precio,
+				},
+			},
+		});
 
-	console.log(`Preferencia creada con ID: ${preferenceId}`);
-	
-	
-	
-    res.status(200).json({ preferenceId });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al crear la preferencia de pago' });
-  }
+		console.log(`Preferencia creada con ID: ${result.id}`);
+
+		res.status(200).json({ preferenceId: result.id });
+	} catch (error) {
+		console.error('Error al crear preferencia:', error);
+		res.status(500).json({ error: 'Error al crear la preferencia de pago' });
+	}
 };
-/**
- * Webhook para recibir notificaciones de Mercado Pago y crear contrato
- */
+
 export const paymentWebhook = async (req, res) => {
 	try {
-		// Mercado Pago envía el query param "topic" y "id"
 		const { id, topic } = req.query;
 
 		if (topic !== 'payment') {
-			return res.status(200).send('No action for this topic');
+			return res.status(200).send('Evento no relevante');
 		}
 
-		// Obtener datos del pago desde Mercado Pago
-		const paymentResponse = await mercadopago.payment.findById(id);
-		const paymentData = paymentResponse.body;
+		// Obtener los datos reales del pago
+		const mpPayment = new MP_Payment(client);
+		const payment = await mpPayment.get({ id });
 
-		// Guardar o actualizar pago en BD
-		let payment = await Payment.findOne({ mercadoPagoId: paymentData.id });
-
-		if (!payment) {
-			payment = new Payment({
-				mercadoPagoId: paymentData.id,
-				status: paymentData.status,
-				amount: paymentData.transaction_amount,
-				method: paymentData.payment_method_id,
-				payerEmail: paymentData.payer.email,
-				metadata: paymentData.metadata,
-				rawData: paymentData,
-			});
-		} else {
-			payment.status = paymentData.status;
-			payment.amount = paymentData.transaction_amount;
-			payment.method = paymentData.payment_method_id;
-			payment.payerEmail = paymentData.payer.email;
-			payment.metadata = paymentData.metadata;
-			payment.rawData = paymentData;
+		if (payment.status !== 'approved') {
+			console.log('⚠️ Pago no aprobado:', payment.status);
+			return res.status(200).send('Pago no aprobado');
 		}
 
-		await payment.save();
+		const metadata = payment.metadata;
+		const { service: servicioId, cliente, fecha, animal, precio } = metadata;
 
-		// Si el pago está aprobado, crear contrato si no existe aún
-		if (payment.status === 'approved') {
-			const existingContract = await Contract.findOne({ pago: payment._id });
-
-			if (!existingContract) {
-				const { service, cliente, proveedor, fecha, horarioInicio, horarioFin } =
-					payment.metadata;
-
-				const newContract = new Contract({
-					service,
-					cliente,
-					proveedor,
-					fecha,
-					horarioInicio,
-					horarioFin,
-					pago: payment._id,
-				});
-
-				await newContract.save();
-			}
+		if (!servicioId || !cliente || !fecha || !animal || !precio) {
+			console.error('❌ Metadata incompleta');
+			return res.status(400).send('Faltan datos en metadata');
 		}
 
-		return res.status(200).send('Payment processed');
+		// Verificar si ya existe el pago
+		const existingPayment = await Payment.findOne({ mercadoPagoId: payment.id });
+		if (existingPayment) {
+			console.log('🔁 Pago ya registrado');
+			return res.status(200).send('Pago ya registrado');
+		}
+
+		// Guardar el pago completo
+		const nuevoPago = await Payment.create({
+			mercadoPagoId: payment.id,
+			status: payment.status,
+			amount: payment.transaction_amount,
+			method: payment.payment_method_id,
+			payerEmail: payment.payer?.email,
+			metadata,
+			rawData: payment, // opcional pero útil para depurar
+		});
+
+		// Verificar si ya existe contrato para este pago
+		const contratoExistente = await Contract.findOne({ pago: nuevoPago._id });
+		if (contratoExistente) {
+			console.log('🔁 Contrato ya creado');
+			return res.status(200).send('Contrato ya existe');
+		}
+
+		// Obtener proveedor desde el servicio
+		const servicio = await Service.findById(servicioId);
+		if (!servicio) {
+			return res.status(404).send('Servicio no encontrado');
+		}
+
+		// Crear contrato
+
+		const nuevoContrato = await Contract.create({
+			servicio: new mongoose.Types.ObjectId(servicioId),
+			cliente: new mongoose.Types.ObjectId(cliente),
+			proveedor: servicio.user,
+			fecha: new Date(fecha),
+			animal: new mongoose.Types.ObjectId(animal),
+			precio,
+			pago: nuevoPago._id,
+		});
+
+		console.log('✅ Contrato creado con éxito:', nuevoContrato._id);
+		return res.status(200).send('Pago y contrato procesados');
 	} catch (error) {
-		console.error('Error processing MP webhook:', error);
-		return res.status(500).send('Internal server error');
+		console.error('❌ Error en webhook:', error.message);
+		return res.status(500).send('Error interno del servidor');
 	}
 };
+
+// https://2c31-2802-8010-3102-e701-d02-8bdf-e60f-15e9.ngrok-free.app/webhook
+
+
+//Dueño de la cuenta
+// TESTUSER1153858536
+
+// Tl4u3SrczH
+
+
+//Cuenta que paga 
+// TESTUSER208300560
+// MFd2bg6AsD

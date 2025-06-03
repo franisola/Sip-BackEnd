@@ -9,7 +9,7 @@ import { createContractSchema, updateContractSchema } from '../schemas/contract.
 const router = Router();
 
 
-router.post('/:id_service/contracts', authRequired, validateSchema(createContractSchema), createContract);
+// router.post('/:id_service/contracts', authRequired, validateSchema(createContractSchema), createContract);
 
 
 router.get('/contracts', authRequired, getContracts);

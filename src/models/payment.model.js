@@ -9,6 +9,7 @@ const paymentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
+      enum: ['pending', 'approved', 'rejected', 'in_process', 'cancelled', 'refunded'],
       required: true,
     },
     amount: {
@@ -16,16 +17,29 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
     method: {
-      type: String,
+      type: String, // Ej: 'credit_card', 'account_money', etc.
     },
     payerEmail: {
       type: String,
     },
     metadata: {
-      type: Object,
+      service: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Service',
+      },
+      cliente: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      fecha: Date,
+      animal: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Animal',
+      },
+      precio: Number,
     },
     rawData: {
-      type: Object,
+      type: Object, // Almacena la respuesta completa del webhook si querés guardar todo.
     },
   },
   {
