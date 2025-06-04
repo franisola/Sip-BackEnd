@@ -40,7 +40,7 @@ export const createPreference = async (req, res) => {
 					pending: 'https://www.google.com/',
 				},
 
-				notification_url: 'https://sip-backend-cqcw.onrender.com/webhook',
+				notification_url: 'https://sip-backend-ru1v.onrender.com/webhook',
 				auto_return: 'approved',
 				metadata: {
 					service: serviceId,

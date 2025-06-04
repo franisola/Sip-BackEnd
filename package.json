@@ -1,34 +1,35 @@
 {
-  "name": "tpoapi",
-  "version": "1.0.0",
-  "description": "api project",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "dev": "nodemon src/index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "\u0016\u0016\u0016\u001b[2~\u0016\u001b[2~https://github.com/franisola/TPOAPI.git"
-  },
-  "keywords": [
-    "node",
-    "js"
-  ],
-  "author": "grupo21",
-  "license": "ISC",
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "mercadopago": "^2.7.0",
-    "mongoose": "^8.4.1",
-    "morgan": "^1.10.0",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.2"
-  }
+	"name": "tpoapi",
+	"version": "1.0.0",
+	"description": "api project",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"start": "node src/index.js",
+		"dev": "nodemon src/index.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "\u0016\u0016\u0016\u001b[2~\u0016\u001b[2~https://github.com/franisola/TPOAPI.git"
+	},
+	"keywords": [
+		"node",
+		"js"
+	],
+	"author": "grupo21",
+	"license": "ISC",
+	"dependencies": {
+		"bcryptjs": "^2.4.3",
+		"cookie-parser": "^1.4.6",
+		"cors": "^2.8.5",
+		"express": "^4.19.2",
+		"jsonwebtoken": "^9.0.2",
+		"mercadopago": "^2.7.0",
+		"mongoose": "^8.4.1",
+		"morgan": "^1.10.0",
+		"zod": "^3.23.8"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.2"
+	}
 }
