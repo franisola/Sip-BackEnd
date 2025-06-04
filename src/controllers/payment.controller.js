@@ -37,9 +37,9 @@ export const createPreference = async (req, res) => {
 				// 	pending: 'https://www.instagram.com/',
 				// },
 				back_urls: {
-					success: 'https://www.google.com/',
-					failure: 'https://www.google.com/',
-					pending: 'https://www.google.com/',
+					success: 'https://be97-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/pago-exitoso',
+					failure: 'https://be97-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/pago-error',
+					pending: 'https://be97-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/pago-exitoso',
 				},
 
 				notification_url: 'https://f5f9-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/webhook',
