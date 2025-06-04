@@ -27,8 +27,6 @@ import Payment from '../models/payment.model.js';
 // 	const service = await Service.findById(id_service);
 // 	if (!service) return res.status(404).json({ msg: 'Servicio no encontrado' });
 
-
-
 // 	const idUserCliente = req.user.id;
 // 	const idProveedor = await Service.findById(id_service);
 
@@ -51,13 +49,27 @@ import Payment from '../models/payment.model.js';
 
 export const getContracts = async (req, res, next) => {
 	const { id } = req.user;
+	console.log(id);
 	try {
-		const contracts = await Contract.find({ idPetSitter: id })
-			.populate('service')
-			.populate('user');
+		const contracts = await Contract.find({ cliente: id }) // Buscar los contratos del cliente
+			.populate('servicio')
+			.populate('proveedor');
 		const lastContracts = contracts.slice(-2);
 
 		res.status(200).json({ contracts, lastContracts });
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const getContractsByService = async (req, res, next) => {
+	const { id } = req.params; // o req.body, depende cómo lo mandes
+	try {
+		const contracts = await Contract.find({ servicio: id })
+			.populate('cliente') // populate para traer la info del cliente
+			.populate('servicio'); // populate del servicio también
+
+		res.status(200).json({ contracts });
 	} catch (error) {
 		next(error);
 	}
