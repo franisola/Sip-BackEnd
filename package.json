@@ -10,7 +10,8 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "\u0016\u0016\u0016\u001b[2~\u0016\u001b[2~https://github.com/franisola/TPOAPI.git"
+		"url": "https://github.com/franisola/TPOAPI.git"
+
 	},
 	"keywords": [
 		"node",
