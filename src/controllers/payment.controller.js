@@ -15,6 +15,8 @@ const client = new MercadoPagoConfig({
 export const createPreference = async (req, res) => {
 	const { fecha, precio, animal, serviceId, userId } = req.body;
 
+	console.log(fecha, precio, animal, serviceId, userId)
+
 	try {
 		const preference = new Preference(client);
 
@@ -40,7 +42,7 @@ export const createPreference = async (req, res) => {
 					pending: 'https://www.google.com/',
 				},
 
-				notification_url: 'https://sip-backend-ru1v.onrender.com/webhook',
+				notification_url: 'https://f5f9-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/webhook',
 				auto_return: 'approved',
 				metadata: {
 					service: serviceId,
