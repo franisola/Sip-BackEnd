@@ -3,7 +3,7 @@ import Payment from '../models/payment.model.js';
 import Contract from '../models/contract.model.js';
 import Service from '../models/service.model.js';
 
-import mongoose from 'mongoose'; 
+import mongoose from 'mongoose';
 
 // Configuración del cliente MercadoPago (v2+)
 const client = new MercadoPagoConfig({
@@ -40,8 +40,7 @@ export const createPreference = async (req, res) => {
 					pending: 'https://www.google.com/',
 				},
 
-				notification_url:
-					'https://2c31-2802-8010-3102-e701-d02-8bdf-e60f-15e9.ngrok-free.app/webhook',
+				notification_url: 'https://sip-backend-cqcw.onrender.com/webhook',
 				auto_return: 'approved',
 				metadata: {
 					service: serviceId,
@@ -140,13 +139,11 @@ export const paymentWebhook = async (req, res) => {
 
 // https://2c31-2802-8010-3102-e701-d02-8bdf-e60f-15e9.ngrok-free.app/webhook
 
-
 //Dueño de la cuenta
 // TESTUSER1153858536
 
 // Tl4u3SrczH
 
-
-//Cuenta que paga 
+//Cuenta que paga
 // TESTUSER208300560
 // MFd2bg6AsD
