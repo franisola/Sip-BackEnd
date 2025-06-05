@@ -15,6 +15,10 @@ const client = new MercadoPagoConfig({
 export const createPreference = async (req, res) => {
 	const { fecha, precio, animal, serviceId, userId } = req.body;
 
+	const backUrl = 'https://36f1-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/';
+	const notificationUrl =
+		'https://6517-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/webhook';
+
 	console.log(fecha, precio, animal, serviceId, userId);
 
 	try {
@@ -37,25 +41,12 @@ export const createPreference = async (req, res) => {
 				// 	pending: 'https://www.instagram.com/',
 				// },
 				back_urls: {
-					success:
-						'https://36f1-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/pago-exitoso',
-					failure:
-						'https://36f1-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/pago-error',
-					pending:
-						'https://36f1-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/pago-exitoso',
+					success: `${backUrl}pago-exitoso`,
+					failure: `${backUrl}pago-error`,
+					pending: `${backUrl}pago-exitoso`,
 				},
 
-				// back_urls: {
-				// 	success:
-				// 		'https://www.google.com/search?q=google&oq=google&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQABiPAjIHCAIQABiPAjIGCAMQRRg8MgYIBBBFGDwyBggFEEUYPNIBCDEyMDNqMGoxqAIAsAIA&sourceid=chrome&ie=UTF-8&sei=BYpAaMLFC9Wf5OUP_LCvgQs',
-				// 	failure:
-				// 		'https://www.google.com/search?q=google&oq=google&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQABiPAjIHCAIQABiPAjIGCAMQRRg8MgYIBBBFGDwyBggFEEUYPNIBCDEyMDNqMGoxqAIAsAIA&sourceid=chrome&ie=UTF-8&sei=BYpAaMLFC9Wf5OUP_LCvgQs',
-				// 	pending:
-				// 		'https://www.google.com/search?q=google&oq=google&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQABiPAjIHCAIQABiPAjIGCAMQRRg8MgYIBBBFGDwyBggFEEUYPNIBCDEyMDNqMGoxqAIAsAIA&sourceid=chrome&ie=UTF-8&sei=BYpAaMLFC9Wf5OUP_LCvgQs',
-				// },
-
-				notification_url:
-					'https://6517-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/webhook',
+				notification_url: notificationUrl,
 				auto_return: 'approved',
 				metadata: {
 					service: serviceId,
