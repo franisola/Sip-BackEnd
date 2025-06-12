@@ -15,9 +15,9 @@ const client = new MercadoPagoConfig({
 export const createPreference = async (req, res) => {
 	const { fecha, precio, animal, serviceId, userId } = req.body;
 
-	const backUrl = 'https://36f1-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/';
+	const backUrl = 'https://3bb6-2800-2330-2900-64d-5ceb-d95c-e043-ff5c.ngrok-free.app/';
 	const notificationUrl =
-		'https://6517-2800-2330-2940-1987-5847-2825-486e-563d.ngrok-free.app/webhook';
+		'https://f845-2800-2330-2900-64d-5ceb-d95c-e043-ff5c.ngrok-free.app/';
 
 	console.log(fecha, precio, animal, serviceId, userId);
 
@@ -46,7 +46,7 @@ export const createPreference = async (req, res) => {
 					pending: `${backUrl}pago-exitoso`,
 				},
 
-				notification_url: notificationUrl,
+				notification_url: notificationUrl + 'webhook',
 				auto_return: 'approved',
 				metadata: {
 					service: serviceId,
