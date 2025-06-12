@@ -26,8 +26,6 @@ import {
 	logout,
 	profile,
 	editProfile,
-	verifyData,
-	changePassword,
 	getUserFeedBack,
 } from '../controllers/user.controller.js';
 import { authRequired } from '../middlewares/validateToken.js';
@@ -52,15 +50,6 @@ router.post('/logout', authRequired, logout);
 router.get('/profile/:id', authRequired, profile);
 
 router.put('/profile', authRequired, validateSchema(editProfileSchema), editProfile);
-
-router.post('/verify-data', authNotRequired, validateSchema(verifyUserSchema), verifyData);
-
-router.post(
-	'/change-password',
-	authNotRequired,
-	validateSchema(resetPasswordSchema),
-	changePassword
-);
 
 router.get('/:id/feedback', authRequired, getUserFeedBack);
 

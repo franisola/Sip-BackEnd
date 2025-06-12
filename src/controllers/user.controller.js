@@ -121,50 +121,6 @@ export const editProfile = async (req, res, next) => {
 	res.status(200).json(user);
 };
 
-export const verifyData = async (req, res, next) => {
-	const { email, telefono } = req.body;
-
-	try {
-		const emailFound = await User.findOne({ email });
-
-		if (!emailFound)
-			return next({ message: 'Usuario no encontrado', key: 'email', statusCode: 400 });
-
-		const telefonoMatch = emailFound.telefono === '549' + telefono;
-
-		if (!telefonoMatch)
-			return next({ message: 'Telefono incorrecto', key: 'telefono', statusCode: 400 });
-		res.status(200).json(true);
-	} catch (error) {
-		next(error);
-	}
-};
-
-export const changePassword = async (req, res, next) => {
-	const { contrasena, email } = req.body;
-
-	try {
-		const passwordHashed = await bcrypt.hash(contrasena, 10);
-
-		const UserFound = await User.findOne({ email });
-		if (!UserFound)
-			return next({ message: 'Usuario no encontrado', key: 'email', statusCode: 400 });
-
-		const { _id: id } = UserFound;
-
-		const user = await User.findByIdAndUpdate(
-			id,
-			{ contraseña: passwordHashed },
-			{
-				new: true,
-			}
-		);
-
-		res.status(200).json(user);
-	} catch (error) {
-		next(error);
-	}
-};
 
 export const getUserFeedBack = async (req, res, next) => {
 	const { id } = req.params;
