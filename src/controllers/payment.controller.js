@@ -135,6 +135,16 @@ export const paymentWebhook = async (req, res) => {
 			pago: nuevoPago._id,
 		});
 
+		//Popular los datos para el email de factura
+		const contratoPopulado = await Contract.findById(nuevoContrato._id)
+			.populate('servicio')
+			.populate('cliente')
+			.populate('proveedor')
+			.populate('animal');
+
+		//ENVIAR LA FACTURA POR EMAIL
+		await sendInvoiceEmail(payment.payer.email, contratoPopulado, nuevoPago);
+
 		console.log('✅ Contrato creado con éxito:', nuevoContrato._id);
 		return res.status(200).send('Pago y contrato procesados');
 	} catch (error) {
