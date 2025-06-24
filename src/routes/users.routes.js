@@ -34,9 +34,9 @@ import { validateSchema } from '../middlewares/validator.middleware.js';
 import {
 	registerSchema,
 	loginSchema,
-	editProfileSchema,
-	verifyUserSchema,
-	resetPasswordSchema,
+	editProfileSchema
+	// verifyUserSchema,
+	// resetPasswordSchema,
 } from '../schemas/user.schema.js';
 
 const router = Router();

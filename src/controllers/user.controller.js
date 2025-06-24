@@ -4,6 +4,7 @@ import Service from '../models/service.model.js';
 import Comment from '../models/comment.model.js';
 import bcrypt from 'bcryptjs';
 import { createAccessToken } from '../libs/jwt.js';
+import { sendWelcomeEmail } from '../libs/emailService.js';
 
 export const register = async (req, res, next) => {
 	const { nombre, apellido, email, contrasena, telefono, domicilio } = req.body;
@@ -28,6 +29,9 @@ export const register = async (req, res, next) => {
 
 		const { contraseña: hashedPassword, ...user } = userSaved._doc;
 		const expires = new Date(Date.now() + 43200000); // 12 horas en ms
+
+		// Enviar email de bienvenida
+		await sendWelcomeEmail(userSaved);
 
 		res.cookie('token', token, {
 			expires,
@@ -120,7 +124,6 @@ export const editProfile = async (req, res, next) => {
 
 	res.status(200).json(user);
 };
-
 
 export const getUserFeedBack = async (req, res, next) => {
 	const { id } = req.params;
